@@ -10,6 +10,7 @@ describe('A FileSystemResourceLocker', (): void => {
 
   beforeEach(async(): Promise<void> => {
     locker = new FileSystemResourceLocker({ attemptSettings: { retryCount: 19, retryDelay: 100 }});
+    await locker.initialize();
   });
 
   afterEach(async(): Promise<void> => {
@@ -109,7 +110,14 @@ describe('A FileSystemResourceLocker', (): void => {
     await expect(locker.acquire(identifier)).rejects.toThrow(InternalServerError);
   });
 
-  it('clears the files in de lock directory after calling finalize.', async(): Promise<void> => {
+  it('clears the files in de lock directory upon calling initialize.', async(): Promise<void> => {
+    await locker.acquire(identifier);
+    await expect(readdir(lockFolder)).resolves.toHaveLength(1);
+    await locker.initialize();
+    await expect(readdir(lockFolder)).resolves.toHaveLength(0);
+  });
+
+  it('clears the files in de lock directory upon calling finalize.', async(): Promise<void> => {
     await locker.acquire(identifier);
     await expect(readdir(lockFolder)).resolves.toHaveLength(1);
     await locker.finalize();

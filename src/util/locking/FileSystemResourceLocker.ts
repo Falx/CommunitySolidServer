@@ -1,9 +1,10 @@
 import { createHash } from 'crypto';
-import { ensureDirSync, pathExists, readdir, rmdir } from 'fs-extra';
+import { ensureDir, pathExists, readdir, rmdir } from 'fs-extra';
 import type { LockOptions, UnlockOptions } from 'proper-lockfile';
 import { lock, unlock } from 'proper-lockfile';
 import type { ResourceIdentifier } from '../../http/representation/ResourceIdentifier';
 import type { Finalizable } from '../../init/final/Finalizable';
+import type { Initializable } from '../../init/Initializable';
 import { getLoggerFor } from '../../logging/LogUtil';
 import { createErrorMessage } from '../errors/ErrorUtil';
 import { InternalServerError } from '../errors/InternalServerError';
@@ -54,7 +55,7 @@ function isCodedError(err: unknown): err is { code: string } & Error {
  * either resolve successfully or reject immediately with the causing error. The retry function of the library
  * however will be ignored and replaced by our own LockUtils' {@link retryFunctionUntil} function.
  */
-export class FileSystemResourceLocker implements ResourceLocker, Finalizable {
+export class FileSystemResourceLocker implements ResourceLocker, Initializable, Finalizable {
   protected readonly logger = getLoggerFor(this);
   private readonly attemptSettings: Required<AttemptSettings>;
   /** Folder that stores the locks */
@@ -62,16 +63,12 @@ export class FileSystemResourceLocker implements ResourceLocker, Finalizable {
 
   /**
    * Create a new FileSystemResourceLocker
-   * @param rootFilePath - The rootPath of the filesystem _[default is the current dir `./`]_
-   * @param lockDirectory - The path to the directory where locks will be stored (appended to rootFilePath)
-                            _[default is `/.internal/locks`]_
-   * @param attemptSettings - Custom settings concerning retrying locks
+   * @param args - Configures the locker using the specified FileSystemResourceLockerArgs instance.
    */
   public constructor(args: FileSystemResourceLockerArgs = {}) {
     const { rootFilePath, lockDirectory, attemptSettings } = args;
     this.attemptSettings = { ...attemptDefaults, ...attemptSettings };
     this.lockFolder = joinFilePath(rootFilePath ?? './', lockDirectory ?? '/.internal/locks');
-    ensureDirSync(this.lockFolder);
   }
 
   /**
@@ -149,13 +146,29 @@ export class FileSystemResourceLocker implements ResourceLocker, Finalizable {
     };
   }
 
+  /* Initializer & Finalizer methods */
+
+  public async initialize(): Promise<void> {
+    // On server start: remove all existing (dangling) locks, so new requests are not blocked.
+    await this.clearLocks();
+    // Ensure the lock folder exists.
+    return ensureDir(this.lockFolder);
+  }
+
   public async finalize(): Promise<void> {
+    // On controlled server shutdown: clean up all existing locks and remove the lock folder.
+    return this.clearLocks(true);
+  }
+
+  private async clearLocks(removeLockFolder = false): Promise<void> {
     // Delete lingering locks in the lockFolder.
     if (await pathExists(this.lockFolder)) {
       for (const dir of await readdir(this.lockFolder)) {
         await rmdir(joinFilePath(this.lockFolder, dir));
       }
-      await rmdir(this.lockFolder);
+      if (removeLockFolder) {
+        await rmdir(this.lockFolder);
+      }
     }
   }
 }

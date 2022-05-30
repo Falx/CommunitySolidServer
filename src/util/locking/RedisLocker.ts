@@ -1,6 +1,7 @@
 import Redis from 'ioredis';
 import type { ResourceIdentifier } from '../../http/representation/ResourceIdentifier';
 import type { Finalizable } from '../../init/final/Finalizable';
+import type { Initializable } from '../../init/Initializable';
 import { getLoggerFor } from '../../logging/LogUtil';
 import type { AttemptSettings } from '../LockUtils';
 import { retryFunction } from '../LockUtils';
@@ -42,13 +43,14 @@ const PREFIX_LOCK = '__L__';
  * * @see [Redis Lua scripting documentation](https://redis.io/docs/manual/programmability/)
  * * @see [ioredis Lua scripting API](https://github.com/luin/ioredis#lua-scripting)
  */
-export class RedisLocker implements ReadWriteLocker, ResourceLocker, Finalizable {
+export class RedisLocker implements ReadWriteLocker, ResourceLocker, Initializable, Finalizable {
   protected readonly logger = getLoggerFor(this);
 
   private readonly redis: Redis;
   private readonly redisRw: RedisReadWriteLock;
   private readonly redisLock: RedisResourceLock;
   private readonly attemptSettings: Required<AttemptSettings>;
+  private finalizeCalled = false;
 
   public constructor(redisClient = '127.0.0.1:6379', attemptSettings: AttemptSettings = {}) {
     this.redis = this.createRedisClient(redisClient);
@@ -113,13 +115,16 @@ export class RedisLocker implements ReadWriteLocker, ResourceLocker, Finalizable
    * @param fn - The function reference to swallow false from.
    */
   private swallowFalse(fn: () => Promise<RedisAnswer>): () => Promise<unknown> {
-    return async(): Promise<unknown> => {
-      const result = await fromResp2ToBool(fn());
-      // Swallow any result resolving to `false`
-      if (result) {
-        return true;
-      }
-    };
+    if (!this.finalizeCalled) {
+      return async(): Promise<unknown> => {
+        const result = await fromResp2ToBool(fn());
+        // Swallow any result resolving to `false`
+        if (result) {
+          return true;
+        }
+      };
+    }
+    throw new Error('Invalid state: cannot execute Redis operation once finalize() has been called.');
   }
 
   public async withReadLock<T>(identifier: ResourceIdentifier, whileLocked: () => (Promise<T> | T)): Promise<T> {
@@ -172,24 +177,34 @@ export class RedisLocker implements ReadWriteLocker, ResourceLocker, Finalizable
     );
   }
 
-  /* Finalizer methods */
+  /* Initializer & Finalizer methods */
+
+  public async initialize(): Promise<void> {
+    // On server start: remove all existing (dangling) locks, so new requests are not blocked.
+    return this.clearLocks();
+  }
 
   public async finalize(): Promise<void> {
-    // This for loop is an extra failsafe,
-    // this extra code won't slow down anything, this function will only be called to shut down in peace
+    this.finalizeCalled = true;
     try {
-      // Remove any lock still open, since once closed, they should no longer be held.
-      const keysRw = await this.redisRw.keys(`${PREFIX_RW}*`);
-      if (keysRw.length > 0) {
-        await this.redisRw.del(...keysRw);
-      }
-
-      const keysLock = await this.redisLock.keys(`${PREFIX_LOCK}*`);
-      if (keysLock.length > 0) {
-        await this.redisLock.del(...keysLock);
-      }
+      // On controlled server shutdown: clean up all existing locks.
+      return await this.clearLocks();
     } finally {
+      // Always quit the redis client
       await this.redis.quit();
+    }
+  }
+
+  private async clearLocks(): Promise<void> {
+    // Remove any lock still open
+    const keysRw = await this.redisRw.keys(`${PREFIX_RW}*`);
+    if (keysRw.length > 0) {
+      await this.redisRw.del(...keysRw);
+    }
+
+    const keysLock = await this.redisLock.keys(`${PREFIX_LOCK}*`);
+    if (keysLock.length > 0) {
+      await this.redisLock.del(...keysLock);
     }
   }
 }

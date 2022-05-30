@@ -22,11 +22,25 @@
       "expiration": 3000
     },
     {
+      "comment": "Makes sure the FileSystemResourceLocker starts with a clean slate when the application is started.",
+      "@id": "urn:solid-server:default:StartCleanupInitializer",
+      "@type": "SequenceHandler",
+      "handlers": [
+        {
+          "@type": "InitializableHandler",
+          "initializable": { "@id": "urn:solid-server:default:FileSystemResourceLocker" }
+        }
+      ]
+    },
+    {
       "comment": "Makes sure the lock folder is cleared and delete when the application needs to stop.",
-      "@id": "urn:solid-server:default:Finalizer",
-      "@type": "ParallelFinalizer",
-      "finalizers": [
-        { "@id": "urn:solid-server:default:FileSystemResourceLocker" }
+      "@id": "urn:solid-server:default:StopCleanupFinalizer",
+      "@type": "SequenceHandler",
+      "handlers": [
+        {
+          "@type": "FinalizableHandler",
+          "finalizable": { "@id": "urn:solid-server:default:FileSystemResourceLocker" }
+        }
       ]
     }
   ]

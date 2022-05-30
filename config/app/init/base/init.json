@@ -30,6 +30,7 @@
         "@id": "urn:solid-server:default:PrimarySequenceInitializer",
         "@type":"SequenceHandler",
         "handlers": [
+          { "@id": "urn:solid-server:default:StartCleanupInitializer"},
           { "@id": "urn:solid-server:default:BaseUrlVerifier" },
           { "@id": "urn:solid-server:default:PrimaryParallelInitializer" },
           { "@id": "urn:solid-server:default:SeededPodInitializer" },
@@ -53,6 +54,13 @@
           { "@id": "urn:solid-server:default:ServerInitializer" }
         ]
       }
+    },
+    {
+      "comment": "These initializers will all be executed sequentially first when starting (the primary process) of the server.",
+      "@id": "urn:solid-server:default:StartCleanupInitializer",
+      "@type":"SequenceHandler",
+      "handlers": [
+      ]
     }
   ]
 }

@@ -19,6 +19,7 @@ const portNames = [
   'PodCreation',
   'PodQuota',
   'RedisLocker',
+  'ResourceLockCleanup',
   'RestrictedIdentity',
   'SeedingPods',
   'ServerFetch',

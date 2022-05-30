@@ -7,18 +7,36 @@
       "@type": "App",
       "initializer": { "@id": "urn:solid-server:default:Initializer" },
       "finalizer": {
-        "comment": "This is going to contain the list of finalizers that need to be called. These should be added in the configs where such classes are configured.",
-        "@id": "urn:solid-server:default:Finalizer",
-        "@type": "ParallelFinalizer",
-        "finalizers": [
-          { "@id": "urn:solid-server:default:ServerInitializer" }
+        "comment": "This is going to determine the sequence of finalizers that needs to be called when stopping the server.",
+        "@type": "SequenceHandler",
+        "handlers": [
+          { "@id": "urn:solid-server:default:Finalizer" },
+          { "@id": "urn:solid-server:default:StopCleanupFinalizer" }
         ]
       },
-      "clusterManager": { 
+      "clusterManager": {
         "@id": "urn:solid-server:default:ClusterManager",
         "@type": "ClusterManager",
         "workers": { "@id": "urn:solid-server:default:variable:workers" }
        }
+    },
+    {
+      "comment": "This is going to contain the list of finalizers that need to be called. These should be added in the configs where such classes are configured.",
+      "@id": "urn:solid-server:default:Finalizer",
+      "@type": "ParallelHandler",
+      "handlers": [
+        {
+          "@type": "FinalizableHandler",
+          "finalizable": { "@id": "urn:solid-server:default:ServerInitializer" }
+        }
+      ]
+    },
+    {
+      "comment": "These finalizers will all be executed sequentially as last when stopping the server.",
+      "@id": "urn:solid-server:default:StopCleanupFinalizer",
+      "@type":"SequenceHandler",
+      "handlers": [
+      ]
     }
   ]
 }
