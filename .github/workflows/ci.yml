@@ -42,7 +42,7 @@ jobs:
       - run: pip install mike
       - run: git config user.name ci-bot
       - run: git config user.email ci-bot@example.com
-      - run: mike deploy --push --updated-aliases 4.0 latest
+      - run: mike deploy --push --update-aliases 4.0 latest
       # - run: mkdocs build -f documentation/mkdocs.yml
       # - run: mkdocs gh-deploy --force -f documentation/mkdocs.yml
 
