@@ -42,6 +42,7 @@ jobs:
       - run: pip install mike
       - run: git config user.name ci-bot
       - run: git config user.email ci-bot@example.com
+      - run: git fetch origin gh-pages --depth=1
       - run: cd documentation && mike deploy --push --update-aliases 4.0 latest
       # - run: mkdocs build -f documentation/mkdocs.yml
       # - run: mkdocs gh-deploy --force -f documentation/mkdocs.yml
