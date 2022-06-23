@@ -12,7 +12,7 @@ on:
       - '**'
 
 jobs:
-  docs:
+  tsdocs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,15 +32,19 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
-      - docs
+      - tsdocs
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
       - run: pip install mkdocs-material 
+      - run: pip install mike
+      - run: git config user.name ci-bot
+      - run: git config user.email ci-bot@example.com
+      - run: mike deploy --push --updated-aliases 4.0 latest
       # - run: mkdocs build -f documentation/mkdocs.yml
-      - run: mkdocs gh-deploy --force -f documentation/mkdocs.yml
+      # - run: mkdocs gh-deploy --force -f documentation/mkdocs.yml
 
   publish-docs:
     needs:
@@ -56,20 +60,20 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          destination_dir: docs
+          destination_dir: 4.0/docs
 
-  docs-versioning:
-    needs:
-      - publish-docs
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - uses: actions/checkout@v2
-      - run: git fetch origin gh-pages --depth=1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - run: pip install mike
-      - run: git config user.name ci-bot
-      - run: git config user.email ci-bot@example.com
-      - run: cd documentation && mike deploy 4.0 latest
+  # docs-versioning:
+  #   needs:
+  #     - publish-docs
+  #   runs-on: ubuntu-latest
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - run: git fetch origin gh-pages --depth=1
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.x
+  #     - run: pip install mike
+  #     - run: git config user.name ci-bot
+  #     - run: git config user.email ci-bot@example.com
+  #     - run: cd documentation && mike deploy 4.0 latest
