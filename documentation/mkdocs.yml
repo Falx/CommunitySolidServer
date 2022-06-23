@@ -51,7 +51,8 @@ extra:
       link: https://gitter.im/CommunitySolidServer/community
 
 nav:
-  - Welcome: README.md
+  - Welcome: 
+    - README.md
   - Usage:    
     - 'Example request': example-requests.md
     - 'Identity provider': identity-provider.md
