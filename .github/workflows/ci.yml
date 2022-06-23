@@ -30,6 +30,7 @@ jobs:
   
   mkdocs:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - docs
     steps:
