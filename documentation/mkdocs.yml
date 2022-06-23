@@ -61,6 +61,6 @@ nav:
   - Contributing: 
     - Pull requests: making-changes.md
     - Releases: release.md
-  - API: https://falx.github.io/CommunitySolidServer/docs/
+  - API: ./docs/
 
 # docker run --rm -it -p 8000:8000 -v ${PWD}/documentation:/docs squidfunk/mkdocs-material
