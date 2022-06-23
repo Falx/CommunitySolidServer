@@ -23,6 +23,7 @@ theme:
     - navigation.indexes
 
 site_name: 'Community Solid Server'
+site_url: https://falx.github.io/CommunitySolidServer
 
 repo_url: https://github.com/Falx/CommunitySolidServer
 repo_name: CommunitySolidServer
