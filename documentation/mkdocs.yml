@@ -24,7 +24,7 @@ theme:
 
 site_name: 'Community Solid Server'
 
-repo_url: https://github.com/CommunitySolidServer/CommunitySolidServer
+repo_url: https://github.com/Falx/CommunitySolidServer
 repo_name: CommunitySolidServer
 edit_uri: ""
 
@@ -34,10 +34,9 @@ plugins:
 markdown_extensions:
   - meta
 
-extra_css:
-  - stylesheets/extra.css
-
 extra:
+  version: 
+    provider: mike
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/CommunitySolidServer/CommunitySolidServer
@@ -61,6 +60,6 @@ nav:
   - Contributing: 
     - Pull requests: making-changes.md
     - Releases: release.md
-  - API: https://communitysolidserver.github.io/CommunitySolidServer/docs/
+  - API: https://falx.github.io/CommunitySolidServer/docs/
 
 # docker run --rm -it -p 8000:8000 -v ${PWD}/documentation:/docs squidfunk/mkdocs-material
