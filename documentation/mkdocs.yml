@@ -62,7 +62,7 @@ nav:
     - Dependency injection: dependency-injection.md
   - Technical topics:
     - Authorization: authorization.md
-    - 'Resource store': resource-store.json
+    - 'Resource store': resource-store.md
   - Contributing: 
     - Pull requests: making-changes.md
     - Releases: release.md
