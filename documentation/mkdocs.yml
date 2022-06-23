@@ -60,6 +60,9 @@ nav:
   - Architecture:
     - Architecture: architecture.md
     - Dependency injection: dependency-injection.md
+  - Technical topics:
+    - Authorization: authorization.md
+    - 'Resource store': resource-store.json
   - Contributing: 
     - Pull requests: making-changes.md
     - Releases: release.md

@@ -38,6 +38,11 @@ the [changelog](https://github.com/CommunitySolidServer/CommunitySolidServer/blo
 
  * [How the server uses dependency injection](dependency-injection.md)
  * [What the architecture looks like](architecture.md)
+
+## Some technical topics
+
+ * [How does authorization work](authorization.md)
+ * [How do Resource Stores work](resource-store.md)
  
 ## Making changes
 
