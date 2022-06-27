@@ -20,6 +20,7 @@ theme:
       primary: deep purple
       accent: deep orange
   features:
+    - navigation.instant
     - navigation.tabs
     - navigation.top
     - navigation.indexes
