@@ -21,6 +21,7 @@ theme:
       accent: deep orange
   features:
     - navigation.instant
+    - navigation.tracking
     - navigation.tabs
     - navigation.top
     - navigation.indexes
