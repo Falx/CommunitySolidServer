@@ -167,7 +167,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            solidproject/community-server
+            tdupont/community-server
           # edge will always be executed (without latest tag), semver only on tag push events (with latest tag)
           tags: |
             type=edge
@@ -195,11 +195,11 @@ jobs:
       - 
         name: "Test docker image 'latest'"
         run: |
-          docker run --rm solidproject/community-server:latest --version
+          docker run --rm tdupont/community-server:latest --version
       - 
         name: "Test docker image 'edge'"
         run: |
-          docker run --rm solidproject/community-server:edge --version
+          docker run --rm tdupont/community-server:edge --version
       - 
         name: Build and push
         uses: docker/build-push-action@v3
@@ -230,7 +230,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            solidproject/community-server
+            tdupont/community-server
           # Just one label: next (no latest here) for the last pushed commit on this branch
           tags: |
             type=raw,value=next
@@ -251,7 +251,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Test docker image 'next'"
         run: |
-          docker run --rm solidproject/community-server:next --version
+          docker run --rm tdupont/community-server:next --version
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
