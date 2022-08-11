@@ -292,7 +292,7 @@ jobs:
           path: docs
           retention-days: 1
 
-  mkdocs:
+  mkdocs-tag:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
@@ -309,11 +309,30 @@ jobs:
       - run: git config user.name ci-bot
       - run: git config user.email ci-bot@example.com
       - run: git fetch origin gh-pages --depth=1
-      - run: cd documentation && mike deploy --push --update-aliases ${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}} latest
+      - run: cd documentation && mike deploy --push --update-aliases ${{steps.get_version.outputs.major}}.x latest
+  
+  mkdocs-latest:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - typedocs
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: pip install mkdocs-material 
+      - run: pip install mike
+      - run: apt-get update && apt-get install -y jq
+      - run: git config user.name ci-bot
+      - run: git config user.email ci-bot@example.com
+      - run: git fetch origin gh-pages --depth=1
+      - run: VERSION=$(curl -s https://communitysolidserver.github.io/CommunitySolidServer/versions.json | jq '.[] | select(.aliases[] | contains("latest")).version')
+      - run: cd documentation && mike deploy --push --update-aliases ${VERSION} latest
 
   publish-docs:
     needs:
-      - mkdocs
+      - mkdocs-tag
       - lint
       - test-unit
       - test-integration
