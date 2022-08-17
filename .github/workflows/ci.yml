@@ -60,12 +60,8 @@ jobs:
         name: Store generated tags
         shell: bash
         run: |
-          myvar=$(cat << 'EOF'
-          ${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}
-          EOF
-          )
           echo 'generated_tags<<EOM' >> $GITHUB_ENV
-          echo "$myvar" >> $GITHUB_ENV
+          echo "${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}" >> $GITHUB_ENV
           echo 'EOM' >> $GITHUB_ENV
       - 
         name: "Test all docker built image tags"
