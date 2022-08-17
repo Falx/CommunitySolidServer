@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           echo 'generated_tags<<EOM' >> $GITHUB_ENV
-          echo "${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}" >> $GITHUB_ENV
+          echo '${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}' >> $GITHUB_ENV
           echo 'EOM' >> $GITHUB_ENV
       - 
         name: "Test all docker built image tags"
