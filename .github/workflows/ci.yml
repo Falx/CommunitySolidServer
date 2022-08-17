@@ -57,14 +57,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - 
-        name: Store generated tags
+        name: Store built tags in env variable
         shell: bash
         run: |
           echo 'generated_tags<<EOM' >> $GITHUB_ENV
           echo '${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}' >> $GITHUB_ENV
           echo 'EOM' >> $GITHUB_ENV
       - 
-        name: "Test all docker built image tags"
+        name: "Test all docker-built image tags"
         shell: bash
         run: |
           jq -rc '.[]' <<< '${{env.generated_tags}}' | while read i; do
